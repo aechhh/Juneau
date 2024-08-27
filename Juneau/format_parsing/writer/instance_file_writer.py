@@ -79,8 +79,8 @@ def __write_object(obj : ObjectInstance, file_writer : FileWriter, is_hpr):
 
                     file_writer.write_nsized_byte_data_at_offset(list_offset + (i * list_elem_size), data, list_elem_size)
 
-                    for i, char in enumerate(string_data):
-                        file_writer.write_byte_at_offset(str_offset_in_file + i, ord(char))
+                    for j, char in enumerate(string_data):
+                        file_writer.write_byte_at_offset(str_offset_in_file + j, ord(char))
 
             # write external objects if this is an instance pointer list
             elif list_data_type == E_VALUETYPE_INSTANCE:

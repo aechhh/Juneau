@@ -25,7 +25,7 @@ def create_genesys_obj_inst(obj_def: ObjectDefintion, parent_res : ResourceEntry
             continue
 
         # create field data
-        for i in range(field.definition.length):
+        for _ in range(field.definition.length):
             field.data.append(0)
 
             if field_type == E_VALUETYPE_STRING:

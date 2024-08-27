@@ -95,8 +95,7 @@ class ObjectInstance():
         return self.__get_subobject_list()
     
     def __get_subobject_list(self) -> list[Self]:
-        sub_objs = []
-        sub_objs.append(self)
+        sub_objs = [self]
 
         for field in self.field_data:
             if len(field.subobjects) != 0:

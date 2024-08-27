@@ -50,7 +50,7 @@ class GenesysInstanceWindow():
             return
 
         with dpg.group(parent=obj_tree_node_tag):
-            for i, field in enumerate(obj.field_data):
+            for _, field in enumerate(obj.field_data):
                 field: InstanceField = field
                 field_data_type = field.definition.type & E_VALUETYPE_VARIABLE_ARRAY_MASK
 

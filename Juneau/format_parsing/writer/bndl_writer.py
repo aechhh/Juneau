@@ -7,12 +7,10 @@ from tkinter import filedialog
 
 import Juneau.config as consts
 
-from copy import deepcopy
-
 from Juneau.format_parsing.writer.file_writer import FileWriter
 from Juneau.format_parsing.writer.instance_file_writer import write_object
 
-from Juneau.formats.bndl.bndl import BNDL, ResourceEntry, ImportEntry
+from Juneau.formats.bndl.bndl import BNDL
 
 def export_bndl_to_file(bndl : BNDL):
     # needed for file dialog popups
