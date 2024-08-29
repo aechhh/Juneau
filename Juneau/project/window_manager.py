@@ -6,7 +6,8 @@ from Juneau.project.tabs import (GenesysInstanceWindow,
                                  GenesysDefinitionWindow,
                                  ResourceEntryWindow,
                                  TextfileWindow,
-                                 LangFileWindow)
+                                 LangFileWindow,
+                                 TextureWindow)
 
 import Juneau.config as consts
 
@@ -37,6 +38,9 @@ class WindowManager():
 
             elif resource_entry.resource_type_id == consts.RESOURCE_ENTRY_TYPE_TEXTFILE:
                 self.__draw_textfile_window(parent, resource_entry)
+
+            elif resource_entry.resource_type_id == consts.RESOURCE_ENTRY_TYPE_TEXTURE:
+                self.__draw_texture_window(parent, resource_entry)
 
             else:
                 self.__draw_resource_entry_window(parent, bndl, resource_entry)
@@ -115,3 +119,9 @@ class WindowManager():
         dpg.configure_item(tab, label=f"Text File ({res.resource_id & 0xFFFFFFFF : 08X})")
 
         _window = TextfileWindow(parent, res)
+
+    def __draw_texture_window(self, parent, res : ResourceEntry):
+        tab = dpg.get_item_user_data(parent)
+        dpg.configure_item(tab, label=f"Texture: {res.resource_id & 0xFFFFFFFF : 08X}")
+
+        _window = TextureWindow(parent, res)

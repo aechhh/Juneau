@@ -3,7 +3,7 @@ import dearpygui.dearpygui as dpg
 from Juneau.formats.bndl.bndl import ResourceEntry
 from Juneau.formats.texture.texture_file import TextureData
 
-class GenesysDefinitionWindow():
+class TextureWindow():
     def __init__(self, parent_tag, res: ResourceEntry) -> None:
         self.parent_tag = parent_tag  # the tag of the parent dpg object
         # should be the root of the window

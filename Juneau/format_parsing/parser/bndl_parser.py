@@ -62,7 +62,7 @@ def fill_lazy_loaded_bndl(bndl : BNDL):
                 res : ResourceEntry = res
 
                 # creating these lists here because otherwise lazy loading all bndls is really slow
-                res.unpacked_data = [[], [], [], []]
+                res.unpacked_data = [bytes(), bytes(), bytes(), bytes()]
 
                 res.imports = []
 
@@ -82,7 +82,9 @@ def fill_lazy_loaded_bndl(bndl : BNDL):
     import_entry_size = struct.calcsize(import_entry_struct_parse_str)
     for res in bndl.get_all_resource_entries():
         if res.is_compressed:
-            res.unpacked_data[0]  = zlib.decompress(res.unpacked_data[0])
+            for i in range(len(res.unpacked_data)):
+                if len(res.unpacked_data[i]) != 0:
+                    res.unpacked_data[i]  = zlib.decompress(res.unpacked_data[i])
 
         if res.import_count != 0:
             # Huge assumption made here, is import data only in data bank 1? i sure hope so 🙏
@@ -135,7 +137,13 @@ def load_all_resource_entry_objects(bndl : BNDL):
 
     # parse textures
     for res in texture_res_list:
-        res.unpacked_object = parse_texture(res.unpacked_data[0], res.unpacked_data[1], False, res.is_hpr)
+        try:
+            res.unpacked_object = parse_texture(res.unpacked_data[0], res.unpacked_data[1], False, res.is_hpr)
+        except Exception as e:
+            res.unpacked_object = None
+
+            print("Texture file parsing failed")
+            print(e)
 
     # parse the genesys definitions
     genesys_obj_defs : list[ObjectDefintion] = []
