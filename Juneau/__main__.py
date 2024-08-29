@@ -1,4 +1,4 @@
-from Juneau.project.project import Project
+from .project.project import Project
 
 def main():
     _proj = Project()
