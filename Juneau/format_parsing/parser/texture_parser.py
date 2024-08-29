@@ -6,7 +6,10 @@ from texture2ddecoder import decode_bc3, decode_bc1
 from Juneau.format_parsing.parser.file_reader import FileReader
 from Juneau.formats.texture.texture_file import TextureData
 
-def parse_texture(main_mem_data, graphics_data, BIG_ENDIAN) -> TextureData:
+def parse_texture(main_mem_data, graphics_data, BIG_ENDIAN, is_hpr) -> TextureData:
+    if is_hpr:
+        return None # oops no hpr support rn
+
     dat_file_reader = FileReader(main_mem_data, BIG_ENDIAN)
     texture_file_reader = FileReader(graphics_data, BIG_ENDIAN)
 
@@ -14,7 +17,7 @@ def parse_texture(main_mem_data, graphics_data, BIG_ENDIAN) -> TextureData:
     magic = dat_file_reader.get_dword_at_offset(0x8)
 
     if magic != 0x1:
-        raise Exception(f"Unexpected texture .dat magic number in file {file_path}")
+        raise Exception(f"Unexpected texture .dat magic number: {magic}")
 
     # parse width and height from file
     width = dat_file_reader.get_nsized_data_at_offset(0x10, 0x2)
@@ -53,7 +56,7 @@ def parse_texture(main_mem_data, graphics_data, BIG_ENDIAN) -> TextureData:
         elif texture_type == "DXT1":
             decoded_data = decode_bc1(graphics_data, width, height)
         else:
-            raise Exception(f"Unknown texture type {texture_type} in {file_path}")
+            raise Exception(f"Unknown texture type: {texture_type}")
 
         offset = 0
         for y in range(height):

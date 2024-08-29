@@ -12,6 +12,7 @@ from Juneau.formats.geneSys.object_defintion import ObjectDefintion
 from Juneau.format_parsing.parser.genesys_parser import parse_object_defintion, parse_first_obj
 from Juneau.format_parsing.parser.langfile_parser import read_lang_file
 from Juneau.format_parsing.parser.textfile_parser import parse_textfile_data
+from Juneau.format_parsing.parser.texture_parser import parse_texture
 
 def lazy_parse_bndl(bndl_path, is_hpr, BIG_ENDIAN = False) -> BNDL:
     # We assume that the file being passed in is a valid bndl file
@@ -106,7 +107,7 @@ def load_all_resource_entry_objects(bndl : BNDL):
 
     textfile_res_list : list[ResourceEntry] = []
 
-    # texture_res_list : list[ResourceEntry] = []
+    texture_res_list : list[ResourceEntry] = []
 
     for res in bndl.get_all_resource_entries():
         if res.resource_type_id == consts.RESOURCE_ENTRY_TYPE_GENESYSDEFINITION:
@@ -121,12 +122,20 @@ def load_all_resource_entry_objects(bndl : BNDL):
         elif res.resource_type_id == consts.RESOURCE_ENTRY_TYPE_TEXTFILE:
             textfile_res_list.append(res)
 
+        elif res.resource_type_id == consts.RESOURCE_ENTRY_TYPE_TEXTURE:
+            texture_res_list.append(res)
+
     # parse langfile
     for res in langfile_res_list:
         res.unpacked_object = read_lang_file(res.unpacked_data[0], False, res.is_hpr)
 
+    # parse textfile
     for res in textfile_res_list:
         res.unpacked_object = parse_textfile_data(res.unpacked_data[0], False)
+
+    # parse textures
+    for res in texture_res_list:
+        res.unpacked_object = parse_texture(res.unpacked_data[0], res.unpacked_data[1], False, res.is_hpr)
 
     # parse the genesys definitions
     genesys_obj_defs : list[ObjectDefintion] = []

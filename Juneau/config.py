@@ -1,8 +1,7 @@
 import sys
 
 # Needs to be true to be able to debug due to dearpygui's multithreaded-ness
-# DEBUGGING = False
-DEBUGGING = getattr(sys, 'gettrace', None) is not None # trying something new with pycharms debugger
+DEBUGGING = False
 
 # when disabled it makes debugging easier
 GENESYS_PARSE_W_MULTIPROCESSING = False
