@@ -65,8 +65,7 @@ class ResourceEntryWindow():
                         dpg.add_text(f"{import_entry.import_type_and_offset:08X}")
 
     def __bank_combo_callback(self, _sender, app_data, _user_data):
-        print(app_data)
-        self.bank_selection = app_data
+        self.bank_selection = int(app_data)
 
     def __export_data_callback(self, _sender, _app_data, _user_data):
         root = tk.Tk()
