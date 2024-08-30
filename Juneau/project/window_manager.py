@@ -82,6 +82,8 @@ class WindowManager():
     def __create_tab(self, title = ""):
         tab = dpg.add_tab(parent=self.dpg_tab_bar, order_mode=dpg.mvTabOrder_Reorderable, label=title, closable=True)
 
+        dpg.set_value(self.dpg_tab_bar, tab)
+
         return dpg.child_window(width=-1, height=-1, parent=tab, no_scrollbar=False, user_data=tab)
 
 
