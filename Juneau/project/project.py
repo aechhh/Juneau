@@ -10,6 +10,8 @@ from Juneau.project.config_file import ConfigFile
 from Juneau.project.object_aggregator import BNDLTree, get_bndl_tree
 from Juneau.project.window_manager import WindowManager
 
+from Juneau.project.windows.settings_window import SettingsWindow
+
 from Juneau.formats.bndl.bndl import BNDL
 from Juneau.format_parsing.parser.bndl_parser import fill_lazy_loaded_bndl
 from Juneau.format_parsing.writer.bndl_writer import export_bndl_to_file
@@ -18,7 +20,10 @@ class Project():
     def __init__(self) -> None:
         self.config = ConfigFile(consts.CONFIG_FILEPATH, consts.CONFIG_FILENAME)
 
+        # dpg windows need to be inited after the library is inited
         self.root_window = None
+
+        self.settings_window = None
 
         self.sidebar_window = None
         self.main_window = None
@@ -92,7 +97,7 @@ class Project():
                 dpg.add_menu_item(label="Open Game Directory", callback=self.__open_game_dir)
 
             with dpg.menu(label="Edit"):
-                dpg.add_menu_item(label="Settings")
+                dpg.add_menu_item(label="Settings", callback=lambda:self.__open_settings_menu())
 
             with dpg.menu(label="View"):
                 pass
@@ -103,6 +108,12 @@ class Project():
                 dpg.add_menu_item(label="Show Style Editor", callback=lambda:dpg.show_tool(dpg.mvTool_Style))
                 dpg.add_menu_item(label="Show Font Manager", callback=lambda:dpg.show_tool(dpg.mvTool_Font))
                 dpg.add_menu_item(label="Show Item Registry", callback=lambda:dpg.show_tool(dpg.mvTool_ItemRegistry))
+
+    def __open_settings_menu(self):
+        if self.settings_window is None:
+            self.settings_window = SettingsWindow(self.config)
+
+        self.settings_window.show()
 
     # --- Menu bar function, open game directory and add files to the sidebar ---
     def __open_game_dir(self):
