@@ -25,7 +25,9 @@ def lazy_parse_bndl(bndl_path, is_hpr, BIG_ENDIAN = False) -> BNDL:
         bundleV2_struct_parse = ">" + bundleV2_struct_parse
         resource_entry_struct_parse = ">" + resource_entry_struct_parse
 
-    with open(bndl_path, "rb") as f:
+    try:
+        f = open(bndl_path, "rb")
+
         bndl_header_data = struct.unpack(bundleV2_struct_parse, f.read(bundleV2_struct_size))
         bndl = BNDL(bndl_path, Path(bndl_path).parts[-1], bndl_header_data, True, is_hpr)
 
@@ -34,6 +36,12 @@ def lazy_parse_bndl(bndl_path, is_hpr, BIG_ENDIAN = False) -> BNDL:
 
             resource_entry_data = struct.unpack(resource_entry_struct_parse, f.read(resource_entry_struct_size))
             bndl.add_object(ResourceEntry(resource_entry_data, bndl.has_compressed_data(), bndl.is_hpr))
+
+        f.close()
+    except FileNotFoundError as e:
+        print(f"BNDL file {bndl_path} not found, returning None")
+
+        return None
 
     return bndl
 

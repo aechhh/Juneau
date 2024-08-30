@@ -142,8 +142,13 @@ def __lazy_load_all_bndls(bndl_filenames, is_hpr, big_endian, progress_bar_tag) 
     for bndl_filename in bndl_filenames:
         dpg.set_value(progress_bar_tag, counter / bndl_amt)
         dpg.set_value(loading_text, f"{bndl_filename} - ({counter}/{bndl_amt})")
-        
-        bndl_list.append(__LazyLoadBNDL(is_hpr, big_endian)(bndl_filename))
+
+        bndl_data = __LazyLoadBNDL(is_hpr, big_endian)(bndl_filename)
+
+        if bndl_data is None:
+            continue
+
+        bndl_list.append(bndl_data)
 
         counter += 1
 
