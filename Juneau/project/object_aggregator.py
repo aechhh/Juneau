@@ -146,6 +146,7 @@ def __lazy_load_all_bndls(bndl_filenames, is_hpr, big_endian, progress_bar_tag) 
         bndl_data = __LazyLoadBNDL(is_hpr, big_endian)(bndl_filename)
 
         if bndl_data is None:
+            print(f"BNDL is missing: {bndl_filename}, SKIPPING!")
             continue
 
         bndl_list.append(bndl_data)
