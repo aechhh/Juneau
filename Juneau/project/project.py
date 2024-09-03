@@ -224,6 +224,10 @@ class Project():
         dpg.hide_item(loading_popup)
 
     def __add_items_to_bndl_tree_node(self, bndl : BNDL, bndl_tree_node):
+        # HACK TO SORT GENESYSINSTANCES A-Z
+        if consts.RESOURCE_ENTRY_TYPE_GENESYSINSTANCE in bndl.objects:
+            bndl.objects[consts.RESOURCE_ENTRY_TYPE_GENESYSINSTANCE].sort(key=lambda res_to_sort : res_to_sort.unpacked_object.obj_def.obj_name)
+
         for resource_type in bndl.objects:
             resource_type_name = bndl.objects[resource_type][0].get_resourse_type_name()
 
