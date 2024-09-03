@@ -1,5 +1,7 @@
 import Juneau.config as consts
 
+from functools import cmp_to_key
+
 from Juneau.formats.geneSys.object_defintion import ObjectDefintion
 
 class ImportEntry():
@@ -107,6 +109,23 @@ class ResourceEntry():
     def get_contains_debug_data(self) -> bool:
         return bool(self.flags & consts.RESOURCE_ENTRIES_FLAGS_CONTAINS_DEBUG_DATA)
 
+    def has_gamechanger_id(self):
+        # res id: 0xff000000ffffffff
+        # id type in highest byte
+        # id in lowest 4 bytes
+
+        return ( self.resource_id >> (7*8) ) & 0xFF == 0x1 # 0x1 is the constant for the game changer id type
+        # see here: https://burnout.wiki/wiki/Bundle_2/Need_for_Speed_Hot_Pursuit#CgsResource::ID::EIdType for more info
+
+    # for below functions: see https://burnout.wiki/wiki/Bundle_2/Need_for_Speed_Hot_Pursuit#Game_Changer_ID
+    def get_gamechanger_id_index(self):
+        return ( ( self.resource_id >> (6*8) ) & 0xFF )
+
+    def get_gamechanger_id_res_type(self):
+        return ( ( self.resource_id >> (4*8) ) & 0xFFFF )
+
+    def get_actual_id(self):
+        return ( self.resource_id & 0xFFFFFFFF )
 
 class BNDL():
     def __init__(self, full_file_path, file_name, header_data, lazy_loaded, is_hpr) -> None:
@@ -180,12 +199,47 @@ class BNDL():
 
         return defs
 
-    def get_all_resource_entries(self) -> list[ResourceEntry]:
+    @staticmethod
+    def resource_entry_game_sort(res_1 : ResourceEntry, res_2 : ResourceEntry) -> int:
+        # see here for sorting reasoning:
+        # https://burnout.wiki/wiki/Bundle_2/Need_for_Speed_Hot_Pursuit#CgsResource::BundleV2::ResourceEntry
+        if res_1.pool_offset < res_2.pool_offset:
+            return 1
+        elif res_1.pool_offset > res_2.pool_offset:
+            return -1
+
+        if res_1.has_gamechanger_id() and res_2.has_gamechanger_id():
+            if res_1.get_gamechanger_id_index() < res_2.get_gamechanger_id_index():
+                return 1
+            elif res_1.get_gamechanger_id_index() > res_2.get_gamechanger_id_index():
+                return -1
+
+            if res_1.get_gamechanger_id_res_type() < res_2.get_gamechanger_id_res_type():
+                return 1
+            elif res_1.get_gamechanger_id_res_type() > res_2.get_gamechanger_id_res_type():
+                return -1
+
+        if res_1.resource_type_id < res_2.resource_type_id:
+            return 1
+        elif res_1.resource_type_id > res_2.resource_type_id:
+            return -1
+
+        if res_1.get_actual_id() < res_2.get_actual_id():
+            return 1
+        elif res_1.get_actual_id() > res_2.get_actual_id():
+            return -1
+
+        return 0
+
+    def get_all_resource_entries(self, game_order_sorted=False) -> list[ResourceEntry]:
         ret = []
 
         for resource_type_id in self.objects:
             for resource_entry in self.objects[resource_type_id]:
                 ret.append(resource_entry)
+
+        if game_order_sorted:
+            ret = sorted(ret, key=cmp_to_key(self.resource_entry_game_sort))
 
         return ret
 

@@ -36,7 +36,7 @@ def export_bndl_to_file(bndl : BNDL):
 
     print("Rewriting all genesys instances")
 
-    for res in bndl.get_all_resource_entries():
+    for res in bndl.get_all_resource_entries(game_order_sorted=True):
         if res.resource_type_id == consts.RESOURCE_ENTRY_TYPE_GENESYSINSTANCE:
             res.unpacked_data[0] = write_object(res.unpacked_object, res.is_hpr)
 
@@ -70,7 +70,7 @@ def export_bndl_to_file(bndl : BNDL):
     for mem_bank in range(4): # 4 is the number of mem banks
         bndl.resource_data_offset[mem_bank] = file_writer.align(16)
 
-        for res in bndl.get_all_resource_entries():
+        for res in bndl.get_all_resource_entries(game_order_sorted=True):
             if len(res.unpacked_data[mem_bank]) == 0:
                 continue
 
@@ -78,21 +78,25 @@ def export_bndl_to_file(bndl : BNDL):
             data = bytearray(res.unpacked_data[mem_bank])
 
             if mem_bank == 0:
-                # make sure end of data is 16 byte aligned
-                padding_needed = 16 - (len(data) % 16) if len(data) % 16 != 0 else 0
-
-                for _ in range(padding_needed):
-                    data.append(0)
-
-                res.import_offset = len(data)
-
                 if res.import_count != len(res.imports):
                     raise Exception("Malformed import count")
 
-                # TODO check endianness
-                import_entry_struct_parse_str = "QL4x"
-                for import_entry in res.imports:
-                    data.extend(struct.pack(import_entry_struct_parse_str, import_entry.resourse_id, import_entry.import_type_and_offset))
+                if res.import_count != 0:
+                    # make sure end of data is 16 byte aligned
+                    padding_needed = 16 - (len(data) % 16) if len(data) % 16 != 0 else 0
+
+                    for _ in range(padding_needed):
+                        data.append(0)
+
+                    res.import_offset = len(data)
+
+                    # TODO check endianness
+                    import_entry_struct_parse_str = "QL4x"
+                    for import_entry in res.imports:
+                        data.extend(struct.pack(import_entry_struct_parse_str, import_entry.resourse_id, import_entry.import_type_and_offset))
+
+                else:
+                    res.import_offset = 0
 
             # --- writing the data ---
             uncompressed_size = len(data)
@@ -119,7 +123,7 @@ def export_bndl_to_file(bndl : BNDL):
             else:
                 file_writer.write_byte_array(res.disk_offset[mem_bank] + bndl.resource_data_offset[mem_bank], data)
 
-    end_of_file = file_writer.align(16)
+    end_of_file = file_writer.align(0x80)
 
     bndl.debug_data_offset = end_of_file
 
@@ -127,8 +131,8 @@ def export_bndl_to_file(bndl : BNDL):
     file_writer.write_struct_data(0, bndl_header_format, bndl.get_header_attributes())
 
     # write all the resource entry headers
-    for mem_bank, resource_entry in enumerate(bndl.get_all_resource_entries()):
-        offset = resource_entry_offset + mem_bank * resource_entry_size
+    for i, resource_entry in enumerate(bndl.get_all_resource_entries(game_order_sorted=True)):
+        offset = resource_entry_offset + (i * resource_entry_size)
 
         file_writer.write_struct_data(offset, resource_entry_format, resource_entry.get_header_data())
 
