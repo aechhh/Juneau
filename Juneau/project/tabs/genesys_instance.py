@@ -102,9 +102,10 @@ class GenesysInstanceWindow():
                                     )
 
                         else:
-                            with dpg.group() as g:
+                            num_subobjs = len([subobj for subobj in field.subobjects if subobj is not None])
 
-                                dpg.set_value(field_name_text, dpg.get_value(field_name_text)[:-2] + f" ({len(field.subobjects)}/{field.definition.size}):")
+                            with dpg.group() as g:
+                                dpg.set_value(field_name_text, dpg.get_value(field_name_text)[:-2] + f" ({num_subobjs}/{field.definition.size}):")
 
                                 # create all sub obj tree nodes
                                 for i in range(field.definition.size):
@@ -186,18 +187,19 @@ class GenesysInstanceWindow():
         if def_for_new_obj is None:
             raise Exception("Could not find challenge definition, something really bad has happened")
 
+        num_subobjs = len([subobj for subobj in field.subobjects if subobj is not None])
+
         if index == len(field.subobjects):
             field.subobjects.append(create_genesys_obj_inst(def_for_new_obj, self.resource_entry))
+        elif index == num_subobjs:
+            field.subobjects[index] = create_genesys_obj_inst(def_for_new_obj, self.resource_entry)
         else:
             print("Please define previous objects first")
 
         self._refresh_obj_window(obj, obj_tree_node_tag)
 
     def _remove_obj_field_list(self, obj : ObjectInstance, obj_tree_node_tag, field : InstanceField, index):
-        if index == len(field.subobjects) - 1:
-            field.subobjects.pop(index)
-        else:
-            print("Please only remove last subobject :)")
+        field.subobjects[index] = None
 
         self._refresh_obj_window(obj, obj_tree_node_tag)
 
